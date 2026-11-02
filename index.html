@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cabine Funtoy - Nome do Evento</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        :root {
+            --app-bg: #f3f4f6;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --text-color: #1f2937;
+            --primary-color: #0984e3;
+            --secondary-color: #ff7675;
+            --border-default: #0984e3;
+            --shadow-default: #74b9ff;
+        }
+
+        body {
+            background-color: var(--app-bg);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Barras Animadas nas Bordas (Apenas o Nome do Evento) */
+        .marquee-container {
+            position: absolute;
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            background: linear-gradient(90deg, #ff7675, #fab1a0, #ffeaa7, #55efc4, #74b9ff, #a29bfe, #ff7675);
+            background-size: 400% 400%;
+            animation: gradient-bg 8s ease infinite;
+            padding: 8px 0;
+            z-index: 5;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .marquee-top { top: 0; }
+        .marquee-bottom { bottom: 0; }
+
+        .marquee-track {
+            display: inline-block;
+            animation: marquee 25s linear infinite;
+            font-size: 1.3rem;
+            letter-spacing: 10px;
+            font-weight: 800;
+            color: #1f2937;
+            text-shadow: 0 1px 3px rgba(255,255,255,0.7);
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+
+        @keyframes gradient-bg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .screen {
+            position: absolute;
+            top: 55px;
+            bottom: 55px;
+            left: 0;
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Botão Global de Tela Cheia */
+        .top-buttons {
+            position: absolute;
+            top: 65px;
+            left: 20px;
+            z-index: 10;
+        }
+
+        .global-btn {
+            background: #ffffff;
+            border: 2px solid var(--secondary-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .global-btn:hover {
+            transform: scale(1.1);
+        }
+
+        #home-screen {
+            text-align: center;
+            position: relative;
+        }
+
+        /* Imagens Decorativas Laterais */
+        .decor-img {
+            position: absolute;
+            width: 120px;
+            height: 170px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border: 3px solid #ffffff;
+            transition: transform 0.3s ease;
+            z-index: 2;
+        }
+
+        .decor-img:hover {
+            transform: scale(1.05);
+        }
+
+        .decor-left {
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-4deg);
+        }
+
+        .decor-right {
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%) rotate(4deg);
+        }
+
+        @media (max-width: 900px) {
+            .decor-img { display: none; }
+        }
+
+        /* Nome Flutuante */
+        #home-screen h1 {
+            font-size: 2.4rem;
+            margin-bottom: 4px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #e84393, #fdcb6e, #00b894, #0984e3, #6c5ce7);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-anim 5s ease infinite, float-anim 3s ease-in-out infinite alternate;
+            letter-spacing: 2px;
+        }
+
+        @keyframes gradient-anim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes float-anim {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-5px); }
+        }
+
+        #home-screen p {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .menu-section {
+            background: var(--panel-bg);
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(0,0,0,0.08);
+            border-radius: 12px;
+            padding: 6px 12px;
+            margin-bottom: 6px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            z-index: 3;
+        }
+
+        .menu-section h3 {
+            font-size: 0.75rem;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .options-grid {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .menu-btn {
+            background: rgba(255,255,255,0.7);
+            border: 2px solid rgba(0,0,0,0.15);
+            color: var(--text-color);
+            padding: 3px 8px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.75rem;
+            transition: 0.2s;
+        }
+
+        .menu-btn.selected {
+            background: var(--primary-color);
+            color: #ffffff;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+        }
+
+        .event-input {
+            width: 100%;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 2px solid rgba(0,0,0,0.15);
+            background: rgba(255,255,255,0.8);
+            color: var(--text-color);
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
+            outline: none;
+        }
+
+        .color-picker-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .color-picker-row label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: 2px solid #fff; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        /* Grade de seleção de símbolos */
+        .symbols-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+            background: rgba(255,255,255,0.5);
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.08);
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .symbol-checkbox-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background: #ffffff;
+            border-radius: 6px;
+            padding: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .symbol-checkbox-label input {
+            display: none;
+        }
+
+        .symbol-checkbox-label input:checked + .symbol-box {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            transform: scale(1.08);
+        }
+
+        .symbol-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #ffffff;
+            border: 3px solid #ffffff;
+            padding: 8px 25px;
+            font-size: 0.9rem;
+            font-weight: 900;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            text-transform: uppercase;
+            margin-top: 3px;
+            transition: transform 0.1s;
+            z-index: 3;
+        }
+
+        .start-btn:active {
+            transform: scale(0.95);
+        }
+
+        #camera-screen {
+            background: #000;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            transform: scaleX(-1);
+        }
+
+        .camera-overlay {
+            position: absolute;
+            bottom: 20px;
+            z-index: 3;
+        }
+
+        .shutter-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffffff 30%, var(--primary-color) 70%, var(--secondary-color) 100%);
+            border: 5px solid #ffeaa7;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        #countdown {
+            position: absolute;
+            font-size: 9rem;
+            font-weight: 900;
+            color: #ffeaa7;
+            text-shadow: 0 0 20px #000;
+            z-index: 5;
+            display: none;
+        }
+
+        /* Tela de Resultado */
+        #result-screen {
+            background: transparent;
+        }
+
+        .photo-strip {
+            background-color: #ffffff;
+            border: 4px solid var(--custom-border, #0984e3);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: var(--custom-shadow, 0 10px 30px rgba(0, 0, 0, 0.1));
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .grid-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-container img {
+            width: 250px;
+            height: 187px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #dfe6e9;
+            display: block;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 8px 18px;
+            border: 2px solid;
+            border-radius: 10px;
+            font-weight: 900;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .btn-retry { background: #ffffff; color: #2d3436; border-color: #b2bec3; }
+        .btn-download { background: var(--primary-color); color: #ffffff; border-color: var(--primary-color); }
+
+        .action-btn:hover {
+            filter: brightness(1.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra Superior Animada com Apenas o Nome do Evento -->
+    <div class="marquee-container marquee-top">
+        <div class="marquee-track" id="marqueeTopText">
+            🎉 [NOME DO EVENTO] ✨
+        </div>
+    </div>
+
+    <div class="top-buttons">
+        <button class="global-btn" onclick="toggleFullScreen()" title="Tela Cheia">⛶</button>
+    </div>
+
+    <!-- 1. TELA INICIAL -->
+    <div id="home-screen" class="screen active">
+        <!-- Imagens Decorativas Laterais -->
+        <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=400&q=80" class="decor-img decor-left" alt="Anime Art">
+        <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=400&q=80" class="decor-img decor-right" alt="K-Pop Vibes">
+
+        <h1>CABINE FUNTOY</h1>
+        <p>Personalize seu evento e crie fotos incríveis</p>
+
+        <div class="menu-section">
+            <h3>🎪 Nome do Evento</h3>
+            <input type="text" id="eventNameInput" class="event-input" value="Cabine Funtoy • Seu Evento" oninput="updateMarquee()">
+        </div>
+        
+        <div class="menu-section">
+            <h3>🎨 Temas do App</h3>
+            <div class="options-grid">
+                <button class="menu-btn selected" onclick="setTheme('anime', this)">⭐ Anime</button>
+                <button class="menu-btn" onclick="setTheme('superhero', this)">💥 Herói</button>
+                <button class="menu-btn" onclick="setTheme('kpop', this)">💖 K-Pop</button>
+                <button class="menu-btn" onclick="setTheme('clean', this)">✨ Clean</button>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <h3>⏱️ Timer & Fotos</h3>
+            <div class="options-grid">
+                <button class="menu-btn selected" onclick="setTimer(3, this)">3s</button>
+                <button class="menu-btn" onclick="setTimer(5, this)">5s</button>
+                <button class="menu-btn" onclick="setMode(1, this); highlightMode(this, 1)">1 Foto</button>
+                <button class="menu-btn" onclick="setMode(2, this); highlightMode(this, 2)">2 Fotos</button>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <h3>🎨 Cores da Borda e Sombra</h3>
+            <div class="color-picker-row">
+                <label>Fundo: <input type="color" id="appBgColorPicker" value="#f3f4f6" oninput="changeAppBackground(this.value)"></label>
+                <label>Borda: <input type="color" id="borderColorPicker" value="#0984e3"></label>
+                <label>Sombra: <input type="color" id="borderShadowColorPicker" value="#74b9ff"></label>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <h3>✨ Símbolos para a Borda</h3>
+            <div class="symbols-grid">
+                <label class="symbol-checkbox-label"><input type="checkbox" value="⭐"><span class="symbol-box">⭐</span></label>
+                <label class="symbol-checkbox-label"><input type="checkbox" value="🌀"><span class="symbol-box">🌀</span></label>
+                <label class="symbol-checkbox-label"><input type="checkbox" value="🍖"><span class="symbol-box">🍖</span></label>
+                <label class="symbol-checkbox-label"><input type="checkbox" value="👁️"><span class="symbol-box">👁️</span></label>
+                <label class="symbol-checkbox-label"><input type="checkbox" value="💥"><span class="symbol-box">💥</span></label>
+                <label class="symbol-checkbox-label"><input type="checkbox" value="🛡️"><span class="symbol-box">🛡️</span></label>
+                <label class="symbol-checkbox-label"><input type="checkbox" value="💖"><span class="symbol-box">💖</span></label>
+                <label class="symbol-checkbox-label"><input type="checkbox" value="🎶"><span class="symbol-box">🎶</span></label>
+                <label class="symbol-checkbox-label"><input type="checkbox" value="⚡"><span class="symbol-box">⚡</span></label>
+                <label class="symbol-checkbox-label"><input type="checkbox" value="🔥"><span class="symbol-box">🔥</span></label>
+                <label class="symbol-checkbox-label"><input type="checkbox" value="💎"><span class="symbol-box">💎</span></label>
+                <label class="symbol-checkbox-label"><input type="checkbox" value="🌸"><span class="symbol-box">🌸</span></label>
+            </div>
+        </div>
+
+        <button class="start-btn" onclick="startCamera()">Ligar Câmera</button>
+    </div>
+
+    <!-- 2. TELA DA CÂMERA -->
+    <div id="camera-screen" class="screen">
+        <div class="camera-container" id="camera-container">
+            <video id="video" autoplay playsinline muted></video>
+            <div id="countdown">3</div>
+            <div class="camera-overlay">
+                <button class="shutter-btn" onclick="triggerCaptureSequence()"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. TELA DE RESULTADO -->
+    <div id="result-screen" class="screen">
+        <div class="photo-strip" id="printable-strip">
+            <div id="grid-preview" class="grid-container"></div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn btn-retry" onclick="retakePhotos()">🔄 Denovo</button>
+            <button class="action-btn btn-download" onclick="downloadStrip()">💾 Baixar Foto</button>
+        </div>
+    </div>
+
+    <!-- Barra Inferior Animada com Apenas o Nome do Evento -->
+    <div class="marquee-container marquee-bottom">
+        <div class="marquee-track" id="marqueeBottomText">
+            🎉 [NOME DO EVENTO] ✨
+        </div>
+    </div>
+
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <script>
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let stream = null;
+        let photoCountMode = 1;
+        let countdownSeconds = 3;
+        let capturedPhotos = [];
+
+        const themes = {
+            anime: { bg: '#f0f3ff', panel: 'rgba(255, 255, 255, 0.9)', text: '#1e1b4b', primary: '#4f46e5', secondary: '#ec4899', border: '#4f46e5', shadow: '#818cf8' },
+            superhero: { bg: '#fffbeb', panel: 'rgba(255, 255, 255, 0.9)', text: '#78350f', primary: '#b91c1c', secondary: '#1d4ed8', border: '#b91c1c', shadow: '#f87171' },
+            kpop: { bg: '#fdf2f8', panel: 'rgba(255, 255, 255, 0.9)', text: '#831843', primary: '#db2777', secondary: '#f43f5e', border: '#db2777', shadow: '#f472b6' },
+            clean: { bg: '#f3f4f6', panel: 'rgba(255, 255, 255, 0.85)', text: '#1f2937', primary: '#0984e3', secondary: '#ff7675', border: '#0984e3', shadow: '#74b9ff' }
+        };
+
+        function setTheme(themeName, btn) {
+            let t = themes[themeName];
+            if (!t) return;
+
+            document.documentElement.style.setProperty('--app-bg', t.bg);
+            document.documentElement.style.setProperty('--panel-bg', t.panel);
+            document.documentElement.style.setProperty('--text-color', t.text);
+            document.documentElement.style.setProperty('--primary-color', t.primary);
+            document.documentElement.style.setProperty('--secondary-color', t.secondary);
+
+            document.getElementById('appBgColorPicker').value = t.bg;
+            document.getElementById('borderColorPicker').value = t.border;
+            document.getElementById('borderShadowColorPicker').value = t.shadow;
+
+            btn.parentElement.querySelectorAll('.menu-btn').forEach(b => {
+                if(!b.getAttribute('onclick').includes('setMode')) b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+        }
+
+        function changeAppBackground(color) {
+            document.documentElement.style.setProperty('--app-bg', color);
+        }
+
+        function updateMarquee() {
+            let eventName = document.getElementById('eventNameInput').value.trim() || "CABINE FUNTOY";
+            let fullText = ` ✨ ${eventName} ✨ `;
+            let repeatedText = fullText.repeat(6);
+            document.getElementById('marqueeTopText').innerText = repeatedText;
+            document.getElementById('marqueeBottomText').innerText = repeatedText;
+        }
+
+        updateMarquee();
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+
+        function setTimer(seconds, btn) {
+            countdownSeconds = seconds;
+            btn.parentElement.querySelectorAll('.menu-btn').forEach(b => {
+                if(b.innerText.includes('Seg') || b.innerText.includes('s')) b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+        }
+
+        function setMode(num, btn) {
+            photoCountMode = num;
+        }
+
+        function highlightMode(btn, num) {
+            btn.parentElement.querySelectorAll('.menu-btn').forEach(b => {
+                if(b.innerText.includes('Foto')) b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+        }
+
+        async function startCamera() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('camera-screen').classList.add('active');
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" }, 
+                    audio: false 
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                alert("Erro ao acessar a câmera.");
+                resetAppToHome();
+            }
+        }
+
+        function retakePhotos() {
+            capturedPhotos = [];
+            startCamera();
+        }
+
+        async function triggerCaptureSequence() {
+            capturedPhotos = [];
+            const countdownEl = document.getElementById('countdown');
+            
+            for (let i = 0; i < photoCountMode; i++) {
+                countdownEl.style.display = 'block';
+                for (let c = countdownSeconds; c > 0; c--) {
+                    countdownEl.innerText = c;
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                countdownEl.style.display = 'none';
+
+                canvas.width = 640;
+                canvas.height = 480;
+                let ctx = canvas.getContext('2d');
+                ctx.save();
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+
+                capturedPhotos.push(canvas.toDataURL('image/png'));
+
+                if (i < photoCountMode - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                }
+            }
+
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+
+            showResultScreen();
+        }
+
+        function showResultScreen() {
+            let customBorder = document.getElementById('borderColorPicker').value;
+            let customShadow = document.getElementById('borderShadowColorPicker').value;
+            let strip = document.getElementById('printable-strip');
+            
+            strip.style.setProperty('--custom-border', customBorder);
+            strip.style.setProperty('--custom-shadow', `0 10px 30px ${customShadow}`);
+
+            let gridPreview = document.getElementById('grid-preview');
+            gridPreview.innerHTML = '';
+
+            capturedPhotos.forEach(src => {
+                let img = document.createElement('img');
+                img.src = src;
+                gridPreview.appendChild(img);
+            });
+
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('result-screen').classList.add('active');
+        }
+
+        function resetAppToHome() {
+            if (stream) stream.getTracks().forEach(track => track.stop());
+            capturedPhotos = [];
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('home-screen').classList.add('active');
+        }
+
+        async function downloadStrip() {
+            let downloadCanvas = document.createElement('canvas');
+            let ctx = downloadCanvas.getContext('2d');
+            
+            let imgElements = document.querySelectorAll('#grid-preview img');
+            if (imgElements.length === 0) return;
+
+            let imgWidth = 800;
+            let imgHeight = 600;
+            let padding = 60;
+            let gap = 20;
+
+            let customBorder = document.getElementById('borderColorPicker').value;
+            let eventName = document.getElementById('eventNameInput').value;
+            let selectedSymbols = [];
+            document.querySelectorAll('.symbols-grid input[type="checkbox"]:checked').forEach(cb => {
+                selectedSymbols.push(cb.value);
+            });
+
+            downloadCanvas.width = imgWidth + (padding * 2);
+            downloadCanvas.height = (imgHeight * imgElements.length) + (gap * (imgElements.length - 1)) + (padding * 2);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
+
+            ctx.strokeStyle = customBorder;
+            ctx.lineWidth = 12;
+            ctx.strokeRect(6, 6, downloadCanvas.width - 12, downloadCanvas.height - 12);
+
+            let currentY = padding;
+            for (let imgEl of imgElements) {
+                let img = new Image();
+                img.src = imgEl.src;
+                await new Promise(resolve => { img.onload = resolve; });
+                ctx.drawImage(img, padding, currentY, imgWidth, imgHeight);
+                currentY += imgHeight + gap;
+            }
+
+            if (eventName) {
+                ctx.font = "bold 28px sans-serif";
+                ctx.fillStyle = customBorder;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(`✨ ${eventName} ✨`, downloadCanvas.width / 2, padding / 2.2);
+            }
+
+            if (selectedSymbols.length > 0) {
+                ctx.font = "36px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                let stepX = 75;
+                let symIndex = 0;
+
+                for (let x = 40; x < downloadCanvas.width; x += stepX) {
+                    let sym1 = selectedSymbols[symIndex % selectedSymbols.length];
+                    let sym2 = selectedSymbols[(symIndex + 1) % selectedSymbols.length];
+                    
+                    if (!eventName) ctx.fillText(sym1, x, padding / 2.5);
+                    ctx.fillText(sym2, x, downloadCanvas.height - (padding / 2.5));
+                    symIndex++;
+                }
+            }
+
+            let link = document.createElement('a');
+            link.download = `cabine-funtoy-${Date.now()}.png`;
+            link.href = downloadCanvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
